@@ -4,7 +4,7 @@ import fitz
 import openai
 from dotenv import load_dotenv
 
-load_dotenv()  
+load_dotenv()
 openai.api_key = os.getenv("openai_key")
 
 def extract_text_from_pdf(pdf_file):
