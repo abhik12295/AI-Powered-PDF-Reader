@@ -42,7 +42,6 @@ def chat_with_gpt(prompt, pdf_text):
 
 # Extract text from PDF using pdfminer
 def extract_text_from_pdf(pdf_path):
-    """Extracts text from a PDF file using pdfminer.six."""
     try:
         return extract_text(pdf_path)
     except Exception as e:
@@ -65,7 +64,7 @@ def save_note_to_db(note, pdf_hash):
     conn.commit()
     conn.close()
 
-# get saved notes for a PDF
+# saved notes for a PDF
 def get_saved_notes(pdf_hash):
     conn = sqlite3.connect("notes.db")
     c = conn.cursor()
@@ -74,7 +73,7 @@ def get_saved_notes(pdf_hash):
     conn.close()
     return notes
 
-# Function to generate an AI summary of the PDF
+# generate an AI summary of the PDF
 def generate_summary(pdf_text):
     return chat_with_gpt("Summarize this document.", pdf_text)
 
@@ -88,11 +87,9 @@ if uploaded_file:
     pdf_hash = generate_pdf_hash(uploaded_file)  # Unique ID for the file
     pdf_path = f"temp_{pdf_hash}.pdf"
 
-    # Save uploaded PDF temporarily
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getvalue())
 
-    # Extract text from PDF using pdfminer.six
     pdf_text = extract_text_from_pdf(pdf_path)
 
     # Connect to DB & check if this PDF has been processed before
@@ -159,7 +156,5 @@ if uploaded_file:
             notes = get_saved_notes(pdf_hash)
             st.text_area("Saved Notes", "\n".join(notes) if notes else "No notes found.", height=200, label_visibility="collapsed")
 
-    conn.close()  # Close DB connection
-
-    # Clean up temp file
+    conn.close()  
     os.remove(pdf_path)
