@@ -1,13 +1,12 @@
 import os
 import json
-import http.client
 import hashlib
-import sqlite3
+import base64
+import http.client
 import streamlit as st
 from pdfminer.high_level import extract_text
 from dotenv import load_dotenv
-import base64
-
+import db_manager 
 
 load_dotenv()
 RAPIDAPI_KEY = os.getenv("rapidapi_key")
@@ -40,7 +39,7 @@ def chat_with_gpt(prompt, pdf_text):
     except Exception as e:
         return f"Error: {e}"
 
-# Extract text from PDF using pdfminer
+# Extract text from PDF
 def extract_text_from_pdf(pdf_path):
     try:
         return extract_text(pdf_path)
@@ -55,27 +54,12 @@ def generate_pdf_hash(pdf_file):
     pdf_file.seek(0)  # Reset file pointer after hashing
     return md5_hash.hexdigest()
 
-# save notes in SQLite
-def save_note_to_db(note, pdf_hash):
-    conn = sqlite3.connect("notes.db")
-    c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, pdf_hash TEXT, note TEXT)")
-    c.execute("INSERT INTO notes (pdf_hash, note) VALUES (?, ?)", (pdf_hash, note))
-    conn.commit()
-    conn.close()
-
-# saved notes for a PDF
-def get_saved_notes(pdf_hash):
-    conn = sqlite3.connect("notes.db")
-    c = conn.cursor()
-    c.execute("SELECT note FROM notes WHERE pdf_hash=?", (pdf_hash,))
-    notes = [row[0] for row in c.fetchall()]
-    conn.close()
-    return notes
-
-# generate an AI summary of the PDF
+# Generate AI summary
 def generate_summary(pdf_text):
     return chat_with_gpt("Summarize this document.", pdf_text)
+
+# Initialize database
+db_manager.initialize_db()
 
 # Streamlit UI
 st.set_page_config(page_title="📄 AI PDF Assistant", layout="wide")
@@ -90,14 +74,8 @@ if uploaded_file:
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getvalue())
 
-    pdf_text = extract_text_from_pdf(pdf_path)
-
-    # Connect to DB & check if this PDF has been processed before
-    conn = sqlite3.connect("notes.db")
-    c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS processed_pdfs (hash TEXT PRIMARY KEY, text TEXT, summary TEXT)")
-    c.execute("SELECT text, summary FROM processed_pdfs WHERE hash=?", (pdf_hash,))
-    existing_pdf = c.fetchone()
+    # Check if PDF has been processed before
+    existing_pdf = db_manager.get_processed_pdf(pdf_hash)
 
     if existing_pdf:
         pdf_text = existing_pdf[0]  # Use saved text
@@ -105,6 +83,7 @@ if uploaded_file:
         st.write("✅ This PDF has already been processed. You can view the saved summary below.")
         st.text_area("AI-Generated Summary", summary, height=150)
     else:
+        pdf_text = extract_text_from_pdf(pdf_path)
         summary = None  # No summary exists yet
 
     col1, col2 = st.columns([2, 1])  # Main content and sidebar
@@ -115,9 +94,6 @@ if uploaded_file:
 
         # PDF.js Viewer
         st.subheader("📄 View PDF")
-        pdf_display = f"""
-        <iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file={pdf_path}" width="100%" height="600px"></iframe>
-        """
         base64_pdf = base64.b64encode(uploaded_file.read()).decode("utf-8")
         pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="500px"></iframe>'
 
@@ -137,9 +113,7 @@ if uploaded_file:
             summary = generate_summary(pdf_text)
             st.text_area("AI-Generated Summary", summary, height=150)
             # Save processed PDF to DB
-            c.execute("INSERT INTO processed_pdfs (hash, text, summary) VALUES (?, ?, ?)",
-                      (pdf_hash, pdf_text, summary))
-            conn.commit()
+            db_manager.save_processed_pdf(pdf_hash, pdf_text, summary)
 
     with col2:
         st.subheader("🗒️ Notes")
@@ -147,14 +121,13 @@ if uploaded_file:
         
         if st.button("Save Note"):
             if note_input.strip():
-                save_note_to_db(note_input, pdf_hash)
+                db_manager.save_note_to_db(note_input, pdf_hash)
                 st.success("Note saved successfully!")
             else:
                 st.warning("Note cannot be empty.")
 
         if st.button("📂 Show Saved Notes"):
-            notes = get_saved_notes(pdf_hash)
+            notes = db_manager.get_saved_notes(pdf_hash)
             st.text_area("Saved Notes", "\n".join(notes) if notes else "No notes found.", height=200, label_visibility="collapsed")
 
-    conn.close()  
     os.remove(pdf_path)
