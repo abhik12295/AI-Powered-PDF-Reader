@@ -9,13 +9,11 @@ from dotenv import load_dotenv
 import base64
 
 
-# Load environment variables
 load_dotenv()
 RAPIDAPI_KEY = os.getenv("rapidapi_key")
 
-# Function to connect to GPT-4o via RapidAPI
+# Connect to GPT-4o via RapidAPI
 def chat_with_gpt(prompt, pdf_text):
-    """Sends user query along with PDF content to GPT-4o via RapidAPI."""
     conn = http.client.HTTPSConnection("gpt-4o.p.rapidapi.com")
     
     payload = json.dumps({
@@ -42,7 +40,7 @@ def chat_with_gpt(prompt, pdf_text):
     except Exception as e:
         return f"Error: {e}"
 
-# Function to extract text from PDF using pdfminer
+# Extract text from PDF using pdfminer
 def extract_text_from_pdf(pdf_path):
     """Extracts text from a PDF file using pdfminer.six."""
     try:
@@ -50,18 +48,16 @@ def extract_text_from_pdf(pdf_path):
     except Exception as e:
         return f"Error extracting text: {e}"
 
-# Function to generate a hash for PDF files
+# Generate a hash for PDF files
 def generate_pdf_hash(pdf_file):
-    """Generate a hash to identify unique PDFs."""
     md5_hash = hashlib.md5()
     while chunk := pdf_file.read(4096):
         md5_hash.update(chunk)
     pdf_file.seek(0)  # Reset file pointer after hashing
     return md5_hash.hexdigest()
 
-# Function to save notes in SQLite
+# save notes in SQLite
 def save_note_to_db(note, pdf_hash):
-    """Saves user notes linked to a specific PDF."""
     conn = sqlite3.connect("notes.db")
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, pdf_hash TEXT, note TEXT)")
@@ -69,9 +65,8 @@ def save_note_to_db(note, pdf_hash):
     conn.commit()
     conn.close()
 
-# Function to get saved notes for a PDF
+# get saved notes for a PDF
 def get_saved_notes(pdf_hash):
-    """Retrieves notes linked to a specific PDF."""
     conn = sqlite3.connect("notes.db")
     c = conn.cursor()
     c.execute("SELECT note FROM notes WHERE pdf_hash=?", (pdf_hash,))
@@ -81,7 +76,6 @@ def get_saved_notes(pdf_hash):
 
 # Function to generate an AI summary of the PDF
 def generate_summary(pdf_text):
-    """Generates an AI-powered summary of the PDF content."""
     return chat_with_gpt("Summarize this document.", pdf_text)
 
 # Streamlit UI
