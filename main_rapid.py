@@ -11,7 +11,6 @@ import db_manager
 load_dotenv()
 RAPIDAPI_KEY = os.getenv("rapidapi_key")
 
-# Connect to GPT-4o via RapidAPI
 def chat_with_gpt(prompt, pdf_text):
     conn = http.client.HTTPSConnection("gpt-4o.p.rapidapi.com")
     
@@ -39,14 +38,12 @@ def chat_with_gpt(prompt, pdf_text):
     except Exception as e:
         return f"Error: {e}"
 
-# Extract text from PDF
 def extract_text_from_pdf(pdf_path):
     try:
         return extract_text(pdf_path)
     except Exception as e:
         return f"Error extracting text: {e}"
 
-# Generate a hash for PDF files
 def generate_pdf_hash(pdf_file):
     md5_hash = hashlib.md5()
     while chunk := pdf_file.read(4096):
@@ -54,9 +51,10 @@ def generate_pdf_hash(pdf_file):
     pdf_file.seek(0)  # Reset file pointer after hashing
     return md5_hash.hexdigest()
 
-# Generate AI summary
 def generate_summary(pdf_text):
     return chat_with_gpt("Summarize this document.", pdf_text)
+
+user_id = st.text_input("Enter User ID (For Multi-User Support)")
 
 # Initialize database
 db_manager.initialize_db()

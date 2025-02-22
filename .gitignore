@@ -1,3 +1,4 @@
 pdfvenv/
 .env
 notes.db
+main_rapid.py
