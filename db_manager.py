@@ -57,4 +57,4 @@ supabase: Client = create_client(
     )
 )
 
-def 
+
