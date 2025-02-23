@@ -9,7 +9,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Page Config
-st.set_page_config(page_title="🔑 Reset Password", layout="centered")
+st.set_page_config(page_title="🔑 Reset Password", layout="centered", initial_sidebar_state = 'collapsed')
 
 # Custom Styling
 page_styles = """
@@ -78,7 +78,7 @@ with st.container():
 
                 # Redirect to Login Page after 3 seconds
                 time.sleep(3)
-                st.switch_page("login.py")
+                st.switch_page("pages/login.py")
 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
