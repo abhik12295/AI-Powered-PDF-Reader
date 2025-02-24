@@ -3,15 +3,12 @@ import time
 import streamlit as st
 from supabase import create_client, Client
 
-# Supabase Credentials
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Page Configuration
 st.set_page_config(page_title="Login to AI PDF Assistant", layout="centered", initial_sidebar_state = 'collapsed')
 
-# Custom Styling
 page_styles = """
 <style>
     body {
@@ -73,21 +70,18 @@ page_styles = """
 """
 st.markdown(page_styles, unsafe_allow_html=True)
 
-# Session Timeout Handling
 SESSION_TIMEOUT = 1800
 if "user" in st.session_state and time.time() - st.session_state["last_active"] > SESSION_TIMEOUT:
     st.session_state["user"] = None
     st.warning("Session expired! Please log in again.")
     st.switch_page("pages/LOGIN.py")
 
-# Login Page UI
 st.markdown("<h2 style='text-align: center;'>AI PDF Assistant Login</h2>", unsafe_allow_html=True)
 
 with st.container():
     email = st.text_input("Email", placeholder="📧 Enter your email")
     password = st.text_input("Password", type="password", placeholder="🔑 Enter your password")
 
-    # Login and Google Sign-In Buttons (Side by Side)
     col1, col2 = st.columns(2)
 
     with col1:
@@ -107,11 +101,9 @@ with st.container():
         google_logo_path = "https://developers.google.com/static/identity/images/btn_google_signin_dark_normal_web.png"
         st.markdown(f'<a href="{google_auth_url}" class="google-btn"><img src="{google_logo_path}" alt="Google Sign-In"></a>', unsafe_allow_html=True)
 
-# Forgot Password Link
 if st.button("Forgot Password?", key="forgot_password_btn", use_container_width=True):
     st.switch_page("pages/FORGOT PASSWORD.py")
 
-# Sign Up Link
 st.markdown("Don't have an account?")
 if st.button("Sign Up", key="signup_btn", use_container_width=True):
     st.switch_page("pages/SIGN UP.py")

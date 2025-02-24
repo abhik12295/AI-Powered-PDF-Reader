@@ -16,7 +16,6 @@ st.set_page_config(page_title="🔐 Welcome!", layout="centered",
                     )
 st.title("📄 AI PDF Assistant")
 
-
 if "user" not in st.session_state or not st.session_state.user:
     st.info("Please log in or sign up to continue.")
     col1, col2 = st.columns(2)
