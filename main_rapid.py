@@ -6,7 +6,7 @@ import http.client
 import streamlit as st
 from pdfminer.high_level import extract_text
 from dotenv import load_dotenv
-import db_manager 
+import db.db_manager as db_manager 
 
 load_dotenv()
 RAPIDAPI_KEY = os.getenv("rapidapi_key")

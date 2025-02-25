@@ -3,7 +3,6 @@ import os
 import time
 from supabase import Client, create_client
 from dotenv import load_dotenv
-from st_pages import add_page_title, get_nav_from_toml
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -27,7 +26,9 @@ if "user" not in st.session_state or not st.session_state.user:
         if st.button("Signup"):
             st.switch_page("pages/SIGN UP.py")
 else:
+    # test this part
     st.success("✅ Redirecting to PDF Processing App...")
-    st.switch_page("pages/main.py")
+    if st.button("Go to Dashboard"):
+        st.switch_page("pages/DASHBOARD.py") #HOME or main
 
 
