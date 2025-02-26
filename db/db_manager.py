@@ -39,5 +39,5 @@ def delete_user_pdf(user_id, pdf_hash):
 
 def rename_user_pdf(user_id, pdf_hash, new_name):
     supabase.table("user_pdfs").update({"pdf_name": new_name}).eq("user_id", user_id).eq("pdf_hash", pdf_hash).execute()
-    
+
 

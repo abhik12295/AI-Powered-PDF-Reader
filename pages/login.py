@@ -70,6 +70,23 @@ page_styles = """
 """
 st.markdown(page_styles, unsafe_allow_html=True)
 
+if "user" not in st.session_state or not st.session_state.get("user"):
+    st.switch_page("DASHBOARD.py")
+
+# Handle OAuth callback
+query_params = st.query_params
+if "access_token" in query_params:
+    # Parse OAuth response
+    access_token = query_params["access_token"]
+    refresh_token = query_params["refresh_token"]
+    
+    # Store session
+    st.session_state["user"] = access_token
+    st.session_state["refresh_token"] = refresh_token
+
+    # Redirect to the dashboard
+    st.switch_page("DASHBOARD.py")
+
 SESSION_TIMEOUT = 1800
 if "user" in st.session_state and time.time() - st.session_state["last_active"] > SESSION_TIMEOUT:
     st.session_state["user"] = None
@@ -97,7 +114,8 @@ with st.container():
                 st.error(f"❌ Error: {e}")
 
     with col2:
-        google_auth_url = supabase.auth.sign_in_with_oauth({"provider": "google"}).url
+        google_auth_url = supabase.auth.sign_in_with_oauth({"provider": "google",
+                                                            "redirect_to": "http://localhost:8501/DASHBOARD.py"}).url
         google_logo_path = "https://developers.google.com/static/identity/images/btn_google_signin_dark_normal_web.png"
         st.markdown(f'<a href="{google_auth_url}" class="google-btn"><img src="{google_logo_path}" alt="Google Sign-In"></a>', unsafe_allow_html=True)
 
