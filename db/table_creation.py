@@ -2,27 +2,27 @@ import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
+# Check if env variables are loaded correctly
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ ERROR: Missing Supabase setup!")
+    print("❌ ERROR: Missing Supabase URL or API Key. Check your .env file.")
     exit()
 
+# Initialize Supabase Client
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    response = supabase.table("user_pdfs").create([
-        {"name": "id", "type": "uuid", "default": "gen_random_uuid()", "primary_key": True},
-        {"name": "user_id", "type": "uuid", "references": "auth.users(id)", "on_delete": "CASCADE"},
-        {"name": "pdf_name", "type": "text", "not_null": True},
-        {"name": "pdf_hash", "type": "text", "unique": True, "not_null": True},
-        {"name": "extracted_text", "type": "text", "not_null": True},
-        {"name": "summary", "type": "text", "nullable": True},
-        {"name": "created_at", "type": "timestamp", "default": "now()"}
-    ])
 
-    print("✅ Table Created Successfully!" if response else " ❌ Table Creation Failed.")
+    # Fetch data from the user_pdfs table
+    response = supabase.table("user_pdfs").select("*").limit(5).execute()
+
+    if response.data:
+        print("✅ Table exists and contains data:", response.data)
+    else:
+        print("⚠️ Table exists but has no data.")
 except Exception as e:
-    print(f"ERROR: Unable to create table : {e}")
+    print(f"❌ ERROR: {e}")
