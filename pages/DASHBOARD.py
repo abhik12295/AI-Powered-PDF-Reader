@@ -191,46 +191,100 @@ main file lower
 #     time.sleep(2)
 #     st.switch_page("pages/LOGIN.py")
 
+'''
+Test
+'''
+# import streamlit as st
+# import os
+# import time
+# from supabase import create_client, Client
+# import urllib.parse
+
+# # Supabase credentials
+# SUPABASE_URL = os.getenv("SUPABASE_URL")
+# SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# st.set_page_config(page_title="Dashboard", layout="wide")
+
+# # ✅ Extract Google OAuth Code from URL
+# query_params = st.query_params
+# code = query_params.get("code")
+# print(code)
+
+# if code and "access_token" not in st.session_state:
+#     st.success("✅ Google OAuth code received! Fetching session...")
+    
+#     try:
+#         response = supabase.auth.exchange_code_for_session({"auth_code": code})
+#         if response.user:
+#             print({"user": response.user, "session": response.session})
+#         session = response.session
+#         print("session:",session)
+#         if session:
+#             st.session_state["access_token"] = session.access_token
+#             st.session_state["refresh_token"] = session.refresh_token
+#             st.session_state["user_email"] = session.user.email
+
+#             st.success("✅ Google Login Successful!")
+#             time.sleep(2)
+#             st.rerun()  # Reload page to remove code from URL
+
+#     except Exception as e:
+#         st.error(f"❌ Failed to fetch session: {e}")
+
+# # Check if logged in
+# if "access_token" in st.session_state:
+#     st.sidebar.success(f"✅ Logged in as {st.session_state['user_email']}")
+#     st.write("### Welcome to your Dashboard!")
+# else:
+#     st.sidebar.error("❌ Please log in first.")
+
+# # # Display welcome message and user details
+# # if session:
+# #     user_name=session['user']['user_metadata'].get('name')
+# #     avatar_url = session['user']['user_metadata'].get('avatar_url')
+# #     email_verified = session['user']['user_metadata'].get('email_verified')
+# #     if not email_verified:
+# #         st.error("Please use a verified email address to log in.")
+# #     else:
+# #         # Additional logic for when the user is authenticated...
+# #         st.write(f"Welcome {user_name}!")
+# #         with st.sidebar:
+# #                 if user_name:  # Checking if user_name exists before attempting to display it
+# #                     st.write(f"Welcome {user_name}!")
+# #                 if avatar_url:  # Similarly, check for avatar_url
+# #                     st.image(avatar_url, width=100)
+# #                 logout_button(url=SUPABASE_URL, apiKey=SUPABASE_ANON_KEY)
+# # ######</SUPABASE OAUTH>#####
+
 
 import streamlit as st
-import os
-import time
-from supabase import create_client, Client
-import urllib.parse
 
-# Supabase credentials
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+def logout():
+    st.session_state.user = None
+    st.session_state.page = 'HOME.py'
+    st.rerun()
 
-st.set_page_config(page_title="Dashboard", layout="wide")
-
-# ✅ Extract Google OAuth Code from URL
-query_params = st.query_params
-code = query_params.get("code")
-
-if code and "access_token" not in st.session_state:
-    st.success("✅ Google OAuth code received! Fetching session...")
-
+def dashboard_page():
     try:
-        response = supabase.auth.exchange_code_for_session({"code": code})
-        session = response.session
-        print("session:",session)
-        if session:
-            st.session_state["access_token"] = session.access_token
-            st.session_state["refresh_token"] = session.refresh_token
-            st.session_state["user_email"] = session.user.email
+        if 'user' not in st.session_state:
+            st.session_state.user = {}
 
-            st.success("✅ Google Login Successful!")
-            time.sleep(2)
-            st.rerun()  # Reload page to remove code from URL
-
+        user = st.session_state.user
+        print(user)
+        
+        if user or 'email' in user:
+            with st.expander('User Information'):
+                st.success(f'🎉 Logged in as: {user.email}')
+                if hasattr(user, 'user_metadata') and "full_name" in user.user_metadata:
+                    st.write(f'Username: {user.user_metadata["email"]}')
+            if st.button('Logout'):
+                logout()
+        else:
+            st.warning("Please log in to access the dashboard.")
     except Exception as e:
-        st.error(f"❌ Failed to fetch session: {e}")
-
-# Check if logged in
-if "access_token" in st.session_state:
-    st.sidebar.success(f"✅ Logged in as {st.session_state['user_email']}")
-    st.write("### Welcome to your Dashboard!")
-else:
-    st.sidebar.error("❌ Please log in first.")
+        st.error(f"❌ Error: {e}")
+    
+if __name__ == '__main__':
+    dashboard_page()

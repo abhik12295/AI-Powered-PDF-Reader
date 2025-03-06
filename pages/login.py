@@ -370,104 +370,43 @@ main
 # if st.button("Sign Up", key="signup_btn", use_container_width=True):
 #     st.switch_page("pages/SIGN UP.py")
 
-
 import streamlit as st
+from supabase import Client, create_client
 import os
-import time
-from supabase import create_client, Client
+from dotenv import load_dotenv
 
-# Supabase credentials
+load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-st.set_page_config(page_title="Login", layout="centered")
+def show_user_info(user):
+    with st.expander('User Information'):
+        st.success(f'🎉 Logged in as: {user.email}')
+        if hasattr(user, 'user_metadata') and "full_name" in user.user_metadata:
+            st.write(f'Username: {user.user_metadata["full_name"]}')
 
-st.markdown("<h2 style='text-align: center;'>Login to AI PDF Assistant</h2>", unsafe_allow_html=True)
+def login_page():
+    st.title("Login 🔒")
+    email = st.text_input('Email', key='login_email')
+    password = st.text_input('Password', type='password', key='login_password')
 
-# ✅ **Get OAuth Code from URL**
-query_params = st.query_params
-code = query_params.get("code")  # Google OAuth returns `code` in URL
-
-if code:
-    st.success("✅ Google OAuth code received! Fetching session...")
-    
-    # **Exchange code for session**
-    try:
-        response = supabase.auth.exchange_code_for_session({"code": code})
-        session = response.session
-        
-        if session:
-            st.session_state["access_token"] = session.access_token
-            st.session_state["refresh_token"] = session.refresh_token
-            st.session_state["user_email"] = session.user.email
-            
-            st.success("✅ Google Login Successful! Redirecting...")
-            
-            # **Log access token**
-            st.text(f"Access Token: {session.access_token}")  # ✅ LOGGING ACCESS TOKEN
-            print(f"Access Token: {session.access_token}")  # Log in terminal
-            
-            time.sleep(2)
-            st.switch_page("pages/DASHBOARD.py")  # Redirect after login
-            
-    except Exception as e:
-        st.error(f"❌ Failed to fetch session: {e}")
-
-# Login form
-email = st.text_input("Email", placeholder="📧 Enter your email")
-password = st.text_input("Password", type="password", placeholder="🔑 Enter your password")
-
-col1, col2 = st.columns(2)
-
-# **Email & Password Login**
-with col1:
     if st.button("Login"):
         try:
-            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-            if response.session:
-                st.session_state["access_token"] = response.session.access_token
-                st.session_state["refresh_token"] = response.session.refresh_token
-                st.session_state["user_email"] = email
-                st.success("✅ Login Successful! Redirecting...")
-                time.sleep(2)
-                st.switch_page("pages/DASHBOARD.py")
+            st.write(f"Attempting to login with Email: {email} and Password: {password}")
+            res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+
+            if res.user:
+                st.session_state.user = res.user
+                #show_user_info(res.user)
+                st.session_state.page = "DASHBOARD.py"
+                st.rerun()
+
+                #st.switch_page("pages/DASHBOARD.py")
+                st.success("🎉 Login successful!")
         except Exception as e:
             st.error(f"❌ Error: {e}")
 
-# **Google OAuth Login**
-with col2:
-    import secrets
-    import base64, hashlib
-
-    def generate_pkce_verifier():
-        code_verifier = secrets.token_urlsafe(64)
-        code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip("=")
-        return code_verifier, code_challenge
-    
-    if st.button("Sign in with Google"):
-        code_verifier, code_challenge = generate_pkce_verifier()
-        st.session_state["code_verifier"] = code_verifier 
-        google_auth_url = supabase.auth.sign_in_with_oauth({
-            "provider": "google",
-            "redirect_to": f"http://localhost:8501/DASHBOARD",
-            "scopes": "email profile",
-            "code_challenge": code_challenge,
-            "code_challenge_method": "S256"
-            }).url
-        st.session_state["oauth_redirect"] = True  # Store redirect flag in session state
-        st.markdown(f'<a href="{google_auth_url}" target="_self">🔗 Click here to sign in with Google</a>', unsafe_allow_html=True)
-
-# # **Handle OAuth Redirect (Get Session)**
-# if "oauth_redirect" in st.session_state:
-#     time.sleep(2)  # Give time for OAuth login
-#     session = supabase.auth.get_session()  # Get the session after OAuth redirect
-
-#     if session:
-#         st.session_state["access_token"] = session.access_token
-#         st.session_state["refresh_token"] = session.refresh_token
-#         st.session_state["user_email"] = session.user.email
-#         del st.session_state["oauth_redirect"]  # Remove redirect flag
-#         st.success("✅ Google Login Successful! Redirecting...")
-#         time.sleep(2)
-#         st.switch_page("pages/DASHBOARD.py")
+if __name__ == '__main__':
+    login_page()

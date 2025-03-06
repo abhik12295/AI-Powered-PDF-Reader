@@ -2,3 +2,5 @@ pdfvenv/
 .env
 notes.db
 main_rapid.py
+
+#https://huggingface.co/blog/as-cle-bert/streamlit-supabase-auth-ui
