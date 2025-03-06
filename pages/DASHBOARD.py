@@ -261,6 +261,10 @@ Test
 
 import streamlit as st
 
+if 'user' not in st.session_state or st.session_state.user is None:
+    st. warning("Not logged in please go to Home for login or signup!")
+
+
 def logout():
     st.session_state.user = None
     st.session_state.page = 'HOME.py'
@@ -269,22 +273,27 @@ def logout():
 def dashboard_page():
     try:
         if 'user' not in st.session_state:
-            st.session_state.user = {}
+            st.session_state.user = None
 
         user = st.session_state.user
         print(user)
         
-        if user or 'email' in user:
+        if user or isinstance(user, dict) or 'email' in user:
             with st.expander('User Information'):
                 st.success(f'🎉 Logged in as: {user.email}')
                 if hasattr(user, 'user_metadata') and "full_name" in user.user_metadata:
                     st.write(f'Username: {user.user_metadata["email"]}')
+
             if st.button('Logout'):
                 logout()
+
         else:
-            st.warning("Please log in to access the dashboard.")
+            st.warning("Please log in or got to home page to access the dashboard.")
+            if st.button("Go to Home"):
+                st.session_state.page = "HOME.py"
+                st.rerun()
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error(f"User doesn't exist, Please login on Home Page!")
     
 if __name__ == '__main__':
-    dashboard_page()
+        dashboard_page()
