@@ -1,10 +1,13 @@
 pdfvenv/
+__pycache__/
+pages/__pycache__/
+db/__pycache__/
 .env
 notes.db
 main_rapid.py
 check_app.py
 api.py
 app.py
-
+supabase_client.py
 #git rm --cached main_rapid.py
 #https://huggingface.co/blog/as-cle-bert/streamlit-supabase-auth-ui
