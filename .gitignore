@@ -2,5 +2,9 @@ pdfvenv/
 .env
 notes.db
 main_rapid.py
+check_app.py
+api.py
+app.py
 
+#git rm --cached main_rapid.py
 #https://huggingface.co/blog/as-cle-bert/streamlit-supabase-auth-ui
