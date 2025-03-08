@@ -1,45 +1,3 @@
-
-# import streamlit as st
-# import os
-# import time
-# from supabase import Client, create_client
-# from dotenv import load_dotenv
-
-# load_dotenv()
-# SUPABASE_URL = os.getenv("SUPABASE_URL")
-# SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# def navigate_to(page):
-#     """Function to update session state and navigate pages."""
-#     st.session_state.page = page
-
-# def home_page():
-#     st.set_page_config(page_title="🔐 Welcome!", layout="centered", 
-#                     initial_sidebar_state = 'collapsed',
-#                         )
-#     st.title("📄 AI PDF Assistant")
-
-#     st.info("Please log in or sign up to continue.")
-#     col1, col2 = st.columns(2)
-
-#     with col1:
-#         if st.button("Login"):
-#             navigate_to("pages/LOGIN.py")
-
-#     with col2:
-#         if st.button("Sign Up"):
-#             navigate_to("signup")
-
-# # Initialize session state if not already set
-# if "page" not in st.session_state:
-#     st.session_state.page = "HOME.py"
-
-
-# if __name__ == '__main__':
-#     home_page()
-
 import streamlit as st
 import os
 from supabase import Client, create_client
@@ -67,17 +25,29 @@ def logout():
     st.rerun()
 
 def home_page():
+    # if 'user' not in st.session_state:
+    #     st.session_state.user = None
+
+    # user = st.session_state.user
+
+    # if user and 'email' in user:  # Corrected condition
+    #     with st.expander('User Information'):
+    #         st.success(f'🎉 Logged in as: {user["email"]}')
+    #         if "user_metadata" in user and "full_name" in user["user_metadata"]:
+    #             st.write(f'Username: {user["user_metadata"]["full_name"]}')
+    
     if 'user' not in st.session_state:
-        st.session_state.user = None
+            st.session_state.user = None
 
     user = st.session_state.user
-
-    if user and 'email' in user:  # Corrected condition
+    print(user)
+    if user and 'email' in user:
         with st.expander('User Information'):
-            st.success(f'🎉 Logged in as: {user["email"]}')
-            if "user_metadata" in user and "full_name" in user["user_metadata"]:
-                st.write(f'Username: {user["user_metadata"]["full_name"]}')
-    
+            st.success(f'🎉 Logged in as: {user.email}')
+            if hasattr(user, 'user_metadata') and 'full_name' in user.user_metadata:
+                st.write(f'Username: {user.user_metadata["email"]}') 
+
+
         if st.button("Go to Dashboard"):
             st.session_state.page = "DASHBOARD.py"
             st.rerun()
