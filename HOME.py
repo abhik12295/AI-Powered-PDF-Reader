@@ -15,7 +15,7 @@ st.set_page_config(page_title="🔐 Welcome!", layout="centered", initial_sideba
 
 st.title("📄 AI PDF Assistant")
 
-# if "user" in st.session_state:
+# if 'user' in st.session_state:
 #     del st.session_state["user"]
 
 def logout():
@@ -25,19 +25,9 @@ def logout():
     st.rerun()
 
 def home_page():
-    # if 'user' not in st.session_state:
-    #     st.session_state.user = None
-
-    # user = st.session_state.user
-
-    # if user and 'email' in user:  # Corrected condition
-    #     with st.expander('User Information'):
-    #         st.success(f'🎉 Logged in as: {user["email"]}')
-    #         if "user_metadata" in user and "full_name" in user["user_metadata"]:
-    #             st.write(f'Username: {user["user_metadata"]["full_name"]}')
-    
     if 'user' not in st.session_state:
             st.session_state.user = None
+            #st.session_state.page = "HOME.py"
 
     user = st.session_state.user
     print(user)
@@ -78,7 +68,7 @@ def set_page(page_name):
     st.session_state.page = page_name
     #st.rerun()
 
-# Initialize session state
+# # Initialize session state
 if "page" not in st.session_state:
     st.session_state.page = "HOME.py"
 

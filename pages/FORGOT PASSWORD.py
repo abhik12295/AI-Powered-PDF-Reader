@@ -78,7 +78,7 @@ with st.container():
 
                 # Redirect to Login Page after 3 seconds
                 time.sleep(3)
-                st.switch_page("pages/login.py")
+                st.switch_page("pages/LOGIN.py")
 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
@@ -86,4 +86,5 @@ with st.container():
             st.warning("⚠️ Please enter your email.")
 
 # Back to Login Link
-st.markdown('<div class="back-to-login"><a href="pages/login.py">← Back to Login</a></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="back-to-login"><a href="LOGIN.py">← Back to Login</a></div>', unsafe_allow_html=True)

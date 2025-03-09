@@ -135,13 +135,21 @@ def signup_page():
     new_password = st.text_input('Password', type='password', key='signup_password')
     
     if st.button("Sign Up"):
-        res = supabase.auth.sign_up({"email": new_email, "password": new_password})
-        
-        if res.user:
-            st.success("🎉 Signup successful!")
-            st.session_state.page = "login"
-        else:
-            st.warning("Signup failed. Please try again.")
+        try:
+            res = supabase.auth.sign_up({"email": new_email, "password": new_password})
+            
+            if res.user:
+                st.success("🎉 Signup successful!")
+                st.session_state.page = "LOGIN"
+            else:
+                st.warning("Signup failed. Please try again.")
+                st.session_state.page = "HOME"
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+    
+    st.markdown("Have an account?")
+    if st.button("Login", key="login", use_container_width=True):
+        st.switch_page("pages/LOGIN.py")
 
 if __name__ == '__main__':
     signup_page()

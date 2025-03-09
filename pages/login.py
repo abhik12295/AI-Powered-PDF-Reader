@@ -389,13 +389,15 @@ def show_user_info(user):
 
 def login_page():
     st.title("Login 🔒")
+    
     email = st.text_input('Email', key='login_email')
     password = st.text_input('Password', type='password', key='login_password')
 
     if st.button("Login"):
         try:
-            st.write(f"Attempting to login with Email: {email} and Password: {password}")
+            #st.write(f"Attempting to login with Email: {email} and Password: {password}")
             res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+
 
             if res.user:
                 st.session_state.user = res.user
@@ -406,7 +408,17 @@ def login_page():
                 #st.switch_page("pages/DASHBOARD.py")
                 st.success("🎉 Login successful!")
         except Exception as e:
-            st.error(f"❌ Error: {e}")
+            st.error(f"❌ Error: You must provide either an email and a password")
+
+    # 🔗 Forgot Password & Signup Links
+    if st.button("Forgot Password?", key="forgot_password_btn", use_container_width=True):
+        st.switch_page("pages/FORGOT PASSWORD.py")
+
+    st.markdown("Don't have an account?")
+    if st.button("Sign Up", key="signup_btn", use_container_width=True):
+        st.switch_page("pages/SIGNUP.py")
+
+
 
 if __name__ == '__main__':
     login_page()
