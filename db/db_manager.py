@@ -31,21 +31,36 @@ def get_user_pdf(user_id, pdf_hash):
     return response.data[0] if response.data else None
 
 def save_user_pdfs(user_id, pdf_name, pdf_hash, extracted_text, summary):
+    print(f"Saving PDF for user_id: {user_id}")  # Debugging
+    if not user_id:
+        print("Error: user_id is None or missing")
+        return False
+    
     existing_pdfs = get_user_pdfs(user_id)
     if len(existing_pdfs)>5:
         return False
-    
+
+
     data = {
         "user_id" : user_id,
         "pdf_name" : pdf_name,
         "pdf_hash" : pdf_hash,
         "extracted_text" : extracted_text,
         "summary" : summary,
-        "created_at": "now()" 
+        #"created_at": "now()" 
     }
 
-    response = supabase.table("user_pdfs").insert(data).execute()
-    return response.data is not None
+    #user_id = user.id  # Ensure this is passed to `save_user_pdfs`
+    print(f"Authenticated User ID: {user_id}")
+
+    try:
+        if data["user_id"]:
+            print(f"user id is {data['user_id']}")
+            response = supabase.table("user_pdfs").insert(data).execute()
+            print("response", response)
+            return response.data is not None
+    except Exception as e:
+        print(f"{e}")
 
 def delete_user_pdf(user_id, pdf_hash):
     response = supabase.table("user_pdfs").delete().eq("user_id", user_id).eq("pdf_hash", pdf_hash).execute()
